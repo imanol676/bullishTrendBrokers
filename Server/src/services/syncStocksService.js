@@ -1,75 +1,53 @@
-import { getStockData } from "./apiServices";
-import pool from "../db.js";
+import axios from "axios";
+import { pool } from "../db.js";
 import cron from "node-cron";
 
-const ARG_TICKERS = [
-  "ALUA",
-  "BBAR",
-  "BMA",
-  "BYMA",
-  "CEPU",
-  "CRES",
-  "CVH",
-  "EDN",
-  "GGAL",
-  "MELI",
-  "PAMP",
-  "SUPV",
-  "TECO2",
-  "TGNO4",
-  "TGSU2",
-  "TRAN",
-  "TXAR",
-  "VALO",
-  "YPFD",
-];
+async function syncStocks() {
+  try {
+    const result = await pool.query("SELECT symbol FROM stocks");
+    const stocks = result.rows;
+    console.log("Acciones a sincronizar:", stocks);
 
-const NASDAQ_TICKERS = [
-  "APPL",
-  "AMZN",
-  "GOOGL",
-  "MSFT",
-  "TSLA",
-  "FB",
-  "NVDA",
-  "PYPL",
-  "ADBE",
-  "NFLX",
-  "INTC",
-  "CSCO",
-  "CMCSA",
-  "PEP",
-  "COST",
-  "TMUS",
-  "AVGO",
-  "TXN",
-  "QCOM",
-  "SBUX",
-];
+    for (const stock of stocks) {
+      const symbol = stock.symbol;
+      const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=ZSQGJ5O4L04R6TJL`;
 
-const syncStocks = async () => {
-  const tickers = [...ARG_TICKERS, ...NASDAQ_TICKERS];
+      try {
+        const response = await axios.get(url);
 
-  for (const ticker of tickers) {
-    try {
-      const stockData = await getStockData(ticker);
-      const { ticker, currentPrice } = stockData;
+        console.log(
+          `Respuesta completa de la API para ${symbol}:`,
+          response.data
+        );
 
-      const query = `
-        INSERT INTO stocks (ticker, name, current_price, last_updated)
-        VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
-        ON CONFLICT (ticker)
-        DO UPDATE SET 
-          current_price = EXCLUDED.current_price,
-          last_updated = EXCLUDED.last_updated;
-      `;
+        const price = parseFloat(response.data["Global Quote"]?.["05. price"]);
 
-      await pool.query(query, [stockData.ticker, stockData.currentPrice]);
-      console.log(`Stock data for ${ticker} synced successfully`);
-    } catch (error) {
-      console.error(`Error syncing stock data for ${ticker}: ${error}`);
+        if (!isNaN(price)) {
+          await pool.query("UPDATE stocks SET price = $1 WHERE symbol = $2", [
+            price,
+            symbol,
+          ]);
+          console.log(`Precio actualizado para ${symbol}: ${price}`);
+        } else {
+          console.error(
+            `No se pudo obtener el precio para ${symbol}. Respuesta:`,
+            response.data
+          );
+        }
+      } catch (apiError) {
+        console.error(
+          `Error al obtener datos de la API para ${symbol}:`,
+          apiError.message
+        );
+      }
     }
-  }
-};
 
-cron.schedule("*/5 * * * *", syncStocks); // Sincronización cada 5 minutos
+    console.log("Sincronización completa.");
+  } catch (error) {
+    console.error("Error al sincronizar acciones:", error.message);
+  }
+}
+
+export default syncStocks;
+
+cron.schedule("*/5 * * * *", syncStocks);

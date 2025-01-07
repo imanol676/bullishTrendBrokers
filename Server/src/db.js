@@ -7,16 +7,14 @@ import {
   DB_USER,
 } from "./config.js";
 
-// Configura los parámetros de conexión
 export const pool = new pg.Pool({
   user: DB_USER,
   host: DB_HOST,
   database: DB_DATABASE,
-  password: DB_PASSWORD,
+  password: String(DB_PASSWORD),
   port: DB_PORT,
 });
 
-// Prueba la conexión
 pool
   .connect()
   .then((client) => {
