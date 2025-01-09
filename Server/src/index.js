@@ -4,6 +4,7 @@ dotenv.config();
 import express from "express";
 import usersRoutes from "./routes/users.routes.js";
 import stocksRoutes from "./routes/stocks.routes.js";
+import transactionRoutes from "./routes/transactions.routes.js";
 import syncStocks from "./services/syncStocksService.js";
 import morgan from "morgan";
 import { PORT } from "./config.js";
@@ -19,9 +20,10 @@ app.use(express.urlencoded({ extended: false }));
 // routes
 app.use(usersRoutes);
 app.use(stocksRoutes);
+app.use(transactionRoutes);
 
 // Sync stocks
-syncStocks();
+//syncStocks();
 
 //Port
 app.listen(PORT);
