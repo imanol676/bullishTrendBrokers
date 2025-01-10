@@ -6,13 +6,29 @@ import {
   deleteStock,
   getStockById,
 } from "../controllers/stocksController.js";
+import { authenticateToken, authorizeRoles } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.get("/stocks", getStocks);
-router.get("/stocks/:stockId", getStockById);
-router.post("/stocks", createStock);
-router.put("/stocks/:stockId", updateStock);
-router.delete("/stocks/:stockId", deleteStock);
+router.get("/stocks", authenticateToken, getStocks);
+router.get(
+  "/stocks/:stockId",
+  authenticateToken,
+  authorizeRoles("admin"),
+  getStockById
+);
+router.post("/stocks", authenticateToken, authorizeRoles("admin"), createStock);
+router.put(
+  "/stocks/:stockId",
+  authenticateToken,
+  authorizeRoles("admin"),
+  updateStock
+);
+router.delete(
+  "/stocks/:stockId",
+  authenticateToken,
+  authorizeRoles("admin"),
+  deleteStock
+);
 
 export default router;

@@ -7,11 +7,27 @@ import {
   updateUser,
   deleteUser,
 } from "../controllers/userController.js";
+import { authenticateToken, authorizeRoles } from "../middlewares/auth.js";
 
-router.get("/users", getUsers);
-router.get("/users/:userId", getUserById);
-router.post("/users", createUser);
-router.put("/users/:userId", updateUser);
-router.delete("/users/:userId", deleteUser);
+router.get("/users", authenticateToken, authorizeRoles("admin"), getUsers);
+router.get(
+  "/users/:userId",
+  authenticateToken,
+  authorizeRoles("admin"),
+  getUserById
+);
+router.post("/users", authenticateToken, authorizeRoles("admin"), createUser);
+router.put(
+  "/users/:userId",
+  authenticateToken,
+  authorizeRoles("admin"),
+  updateUser
+);
+router.delete(
+  "/users/:userId",
+  authenticateToken,
+  authorizeRoles("admin"),
+  deleteUser
+);
 
 export default router;
