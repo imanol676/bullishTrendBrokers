@@ -1,6 +1,7 @@
 import axios from "axios";
 import { pool } from "../db.js";
 import cron from "node-cron";
+import { FINNHUB_API_KEY, FINNHUB_BASE_URL } from "../config.js";
 
 async function syncStocks() {
   try {
@@ -10,17 +11,13 @@ async function syncStocks() {
 
     for (const stock of stocks) {
       const symbol = stock.symbol;
-      const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=ZSQGJ5O4L04R6TJL`;
+      const url = `${FINNHUB_BASE_URL}/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`;
 
       try {
         const response = await axios.get(url);
+        console.log(`Respuesta de la API para ${symbol}:`, response.data);
 
-        console.log(
-          `Respuesta completa de la API para ${symbol}:`,
-          response.data
-        );
-
-        const price = parseFloat(response.data["Global Quote"]?.["05. price"]);
+        const price = parseFloat(response.data["c"]); // Precio actual
 
         if (!isNaN(price)) {
           await pool.query("UPDATE stocks SET price = $1 WHERE symbol = $2", [
@@ -30,21 +27,21 @@ async function syncStocks() {
           console.log(`Precio actualizado para ${symbol}: ${price}`);
         } else {
           console.error(
-            `No se pudo obtener el precio para ${symbol}. Respuesta:`,
+            `No se pudo obtener un precio válido para ${symbol}. Respuesta:`,
             response.data
           );
         }
-      } catch (apiError) {
+      } catch (APIError) {
         console.error(
-          `Error al obtener datos de la API para ${symbol}:`,
-          apiError.message
+          `Error al obtener el precio para ${symbol}:`,
+          APIError.response?.data || APIError.message
         );
       }
     }
 
     console.log("Sincronización completa.");
   } catch (error) {
-    console.error("Error al sincronizar acciones:", error.message);
+    console.error("Error al sincronizar las acciones:", error.message);
   }
 }
 

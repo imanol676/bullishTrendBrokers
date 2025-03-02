@@ -1,13 +1,20 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const LogForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Aquí puedes agregar la lógica para enviar el formulario de inicio de sesión
     console.log("Formulario enviado", { email, password });
+
+    // Simula el envío al backend y redirige al usuario
+    setTimeout(() => {
+      navigate("/validate-token"); // Redirige a la página de validación
+    }, 500); // Simula un retraso para simular el envío
   };
 
   return (

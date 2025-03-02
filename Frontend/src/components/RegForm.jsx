@@ -36,12 +36,17 @@ const RegForm = () => {
     }
     return formErrors;
   };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const formErrors = validateForm();
     if (Object.keys(formErrors).length === 0) {
       console.log("Formulario enviado con éxito:", formData);
-      // Aquí puedes manejar el envío a un backend
+
+      // Simula el envío al backend y redirige al usuario
+      setTimeout(() => {
+        navigate("/validate-token"); // Redirige a la página de validación
+      }, 500); // Simula un retraso para simular el envío
     } else {
       setErrors(formErrors);
     }
@@ -58,7 +63,7 @@ const RegForm = () => {
       <p className="text-center text-sm mb-6 text-zinc-400">
         Regístrate para empezar a invertir.
       </p>
-      {/* name */}
+      {/* Nombre */}
       <div className="mb-4">
         <label htmlFor="name" className="block text-sm font-medium mb-2">
           Nombre Completo
@@ -94,7 +99,7 @@ const RegForm = () => {
           <p className="text-red-500 text-sm mt-1">{errors.email}</p>
         )}
       </div>
-      {/* Password */}
+      {/* Contraseña */}
       <div className="mb-4">
         <label htmlFor="password" className="block text-sm font-medium mb-2">
           Contraseña
@@ -112,7 +117,7 @@ const RegForm = () => {
           <p className="text-red-500 text-sm mt-1">{errors.password}</p>
         )}
       </div>
-      {/* Confirm Password */}
+      {/* Confirmar Contraseña */}
       <div className="mb-4">
         <label
           htmlFor="confirmPassword"
@@ -133,7 +138,7 @@ const RegForm = () => {
           <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
         )}
       </div>
-      {/* Submit Button */}
+      {/* Botón de Enviar */}
       <button
         type="submit"
         className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg transition duration-300"

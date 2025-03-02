@@ -1,6 +1,6 @@
 import { pool } from "../db.js";
 
-export const depositController = async (req, res) => {
+const depositController = async (req, res) => {
   const { userId, amount, currency } = req.body;
 
   console.log(
@@ -82,3 +82,5 @@ export const depositController = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export default depositController;
